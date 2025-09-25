@@ -1,4 +1,40 @@
-export default function Home() {
+import { redirect } from "next/navigation";
+
+async function submitContact(formData: FormData) {
+  "use server";
+  const name = formData.get("name")?.toString().trim() || "";
+  const email = formData.get("email")?.toString().trim() || "";
+  const message = formData.get("message")?.toString().trim() || "";
+  const botField = formData.get("website")?.toString().trim() || ""; // honeypot
+
+  if (botField) {
+    redirect("/?contact=sent#contact");
+  }
+
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!name || !isEmail || !message) {
+    redirect("/?contact=error#contact");
+  }
+
+  console.log("Contact form submission:", {
+    name,
+    email,
+    message,
+    at: new Date().toISOString(),
+  });
+
+  redirect("/?contact=sent#contact");
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = (await searchParams) || {};
+  const contactParam = sp.contact;
+  const contactStatus = Array.isArray(contactParam) ? contactParam[0] : contactParam;
+
   return (
     <div className="min-h-screen text-foreground">
       <header className="sticky top-0 z-30 backdrop-blur-md/2 bg-white/40 shadow-[0_8px_30px_rgb(255_140_26_/_0.12)] border-b border-orange-200/50">
@@ -159,6 +195,62 @@ export default function Home() {
                   See Full Menu
                 </a>
               </div>
+
+              {contactStatus === "sent" && (
+                <div className="mt-8 rounded-xl border border-green-300/70 bg-green-50 text-green-900 px-4 py-3">
+                  Thanks! Your message was sent. We&apos;ll get back to you soon.
+                </div>
+              )}
+              {contactStatus === "error" && (
+                <div className="mt-8 rounded-xl border border-red-300/70 bg-red-50 text-red-900 px-4 py-3">
+                  Please fill out all fields with a valid email address.
+                </div>
+              )}
+
+              <form action={submitContact} className="mt-8 grid gap-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid gap-1">
+                    <label htmlFor="name" className="text-sm font-medium text-orange-900/90">Name</label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      required
+                      placeholder="Your name"
+                      className="w-full rounded-xl border border-orange-300/70 bg-white/80 px-3 py-2 shadow-sm outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <label htmlFor="email" className="text-sm font-medium text-orange-900/90">Email</label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      className="w-full rounded-xl border border-orange-300/70 bg-white/80 px-3 py-2 shadow-sm outline-none focus:ring-2 focus:ring-orange-400"
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-1">
+                  <label htmlFor="message" className="text-sm font-medium text-orange-900/90">Message</label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={5}
+                    required
+                    placeholder="Tell us what&apos;s on your mind..."
+                    className="w-full rounded-xl border border-orange-300/70 bg-white/80 px-3 py-2 shadow-sm outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                </div>
+                {/* Honeypot field */}
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+                <div>
+                  <button type="submit" className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-600 to-yellow-500 text-white font-semibold px-5 py-3 shadow hover:scale-[1.02] active:scale-[.99] transition">
+                    Send Message
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </section>
