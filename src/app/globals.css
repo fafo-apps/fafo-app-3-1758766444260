@@ -1,26 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff7e6; /* warm cream */
+  --foreground: #241200; /* deep brown for contrast */
+  --accent: #ff8c1a; /* orange */
+  --accent-2: #ffd000; /* yellow */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1a0f00; /* dark toasted */
+    --foreground: #fff1c2; /* light butter */
   }
 }
 
+html, body { height: 100%; }
+
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1200px 600px at -10% -10%, rgba(255,221,87,0.45), transparent 60%),
+    radial-gradient(1000px 500px at 110% 10%, rgba(255,140,26,0.35), transparent 55%),
+    linear-gradient(135deg, #ffedd5 0%, #fff7e6 30%, #fff3bf 60%, #ffe799 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
+
+/* Subtle grid texture overlay via pseudo */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255,140,26,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,140,26,0.06) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px;
+  mask-image: radial-gradient(circle at 50% 20%, black 0%, transparent 70%);
+}
+
+/* Utilities */
+.container { max-width: 72rem; margin-inline: auto; padding-inline: 1rem; }
